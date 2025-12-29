@@ -25,7 +25,7 @@ Claude Shell is an Oh My Zsh plugin that translates natural language queries int
 1. Clone this plugin into your Oh My Zsh custom plugins directory:
 
 ```bash
-git clone <repository-url> ~/.oh-my-zsh/custom/plugins/claude-shell
+git clone <repository-url> $ZSH_CUSTOM/plugins/claude-shell
 ```
 
 2. Add `claude-shell` to your plugins array in `~/.zshrc`:
