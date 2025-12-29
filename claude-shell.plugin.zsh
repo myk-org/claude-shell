@@ -29,15 +29,27 @@
 #     2. Press Alt+S to find the most relevant command from history
 #     3. Review and execute the found command
 #
+#   Alt+W: What Went Wrong (Kitty only)
+#     1. Run a command that produces an error
+#     2. Press Alt+W to analyze the last 200 lines of scrollback
+#     3. Get a diagnosis and suggested fix
+#
+#   Alt+Q: Quick Summary (Kitty only)
+#     1. Press Alt+Q to get a concise summary of current terminal output
+#     2. Useful for understanding long command outputs
+#
 # Requirements:
 #   - Claude CLI tool must be installed and available in PATH
 #   - Proper Claude API credentials configured
+#   - Optional: Kitty terminal (for Alt+W and Alt+Q features)
 #
 # Keybindings:
 #   Alt+G - Translate natural language to shell command
 #   Alt+E - Explain current command
 #   Alt+X - Fix last failed command
 #   Alt+S - Search command history with natural language
+#   Alt+W - Analyze error in scrollback (Kitty only)
+#   Alt+Q - Summarize terminal output (Kitty only)
 #
 # Author: Custom Plugin
 # ------------------------------------------------------------------------------
@@ -199,14 +211,98 @@ claude-history-search() {
   zle -R
 }
 
+# What went wrong widget (Kitty scrollback analysis)
+# Analyzes the last 200 lines of scrollback to diagnose errors
+claude-what-went-wrong() {
+  # Check if running inside Kitty
+  if [[ -z "$KITTY_PID" ]]; then
+    zle -M "Error: This feature requires Kitty terminal"
+    zle -R
+    return 0
+  fi
+
+  # Show processing message
+  zle -M "Analyzing scrollback for errors..."
+  zle -R  # Force immediate redraw
+
+  # Get last 200 lines of scrollback
+  local scrollback_content
+  scrollback_content=$(kitty @ get-text --extent=all 2>/dev/null | tail -200)
+
+  # Check if we got content
+  if [[ -z "$scrollback_content" ]]; then
+    zle -M "Error: Could not retrieve scrollback content"
+    zle -R
+    return 0
+  fi
+
+  # Send to Claude for analysis
+  local analysis
+  analysis=$(echo "$scrollback_content" | claude -p "Analyze this terminal output. What error or problem occurred? How can it be fixed? Be concise." 2>/dev/null)
+
+  # Check if claude command succeeded
+  if [[ $? -eq 0 && -n "$analysis" ]]; then
+    # Display analysis
+    zle -M "$analysis"
+  else
+    zle -M "Error: Could not analyze scrollback with Claude"
+  fi
+
+  zle -R
+}
+
+# Quick summary widget (Kitty screen content)
+# Summarizes current screen content concisely
+claude-summarize-output() {
+  # Check if running inside Kitty
+  if [[ -z "$KITTY_PID" ]]; then
+    zle -M "Error: This feature requires Kitty terminal"
+    zle -R
+    return 0
+  fi
+
+  # Show processing message
+  zle -M "Summarizing terminal output..."
+  zle -R  # Force immediate redraw
+
+  # Get current screen content
+  local screen_content
+  screen_content=$(kitty @ get-text --extent=screen 2>/dev/null)
+
+  # Check if we got content
+  if [[ -z "$screen_content" ]]; then
+    zle -M "Error: Could not retrieve screen content"
+    zle -R
+    return 0
+  fi
+
+  # Send to Claude for summary
+  local summary
+  summary=$(echo "$screen_content" | claude -p "Summarize this terminal output concisely in 2-3 sentences." 2>/dev/null)
+
+  # Check if claude command succeeded
+  if [[ $? -eq 0 && -n "$summary" ]]; then
+    # Display summary
+    zle -M "$summary"
+  else
+    zle -M "Error: Could not summarize output with Claude"
+  fi
+
+  zle -R
+}
+
 # Register all widgets
 zle -N claude-nl-to-shell
 zle -N claude-explain-command
 zle -N claude-fix-error
 zle -N claude-history-search
+zle -N claude-what-went-wrong
+zle -N claude-summarize-output
 
 # Bind to Alt+ keys (^[ is the escape sequence for Alt)
-bindkey '^[g' claude-nl-to-shell      # Alt+G
+bindkey '^[g' claude-nl-to-shell       # Alt+G
 bindkey '^[e' claude-explain-command   # Alt+E
 bindkey '^[x' claude-fix-error         # Alt+X
 bindkey '^[s' claude-history-search    # Alt+S
+bindkey '^[w' claude-what-went-wrong   # Alt+W
+bindkey '^[q' claude-summarize-output  # Alt+Q
