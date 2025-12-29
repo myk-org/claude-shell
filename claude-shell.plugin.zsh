@@ -55,6 +55,7 @@ claude-nl-to-shell() {
 
   # Show a processing message
   zle -M "Processing: $nl_query"
+  zle -R  # Force immediate redraw
 
   # Translate to shell command using claude
   local shell_cmd
@@ -94,6 +95,7 @@ claude-explain-command() {
 
   # Show processing message
   zle -M "Explaining command..."
+  zle -R  # Force immediate redraw
 
   # Get explanation from Claude
   local explanation
@@ -128,6 +130,7 @@ claude-fix-error() {
 
   # Show processing message
   zle -M "Analyzing error for: $last_cmd"
+  zle -R  # Force immediate redraw
 
   # Get fix suggestion from Claude
   local fixed_cmd
@@ -173,6 +176,7 @@ claude-history-search() {
 
   # Show processing message
   zle -M "Searching history for: $search_query"
+  zle -R  # Force immediate redraw
 
   # Search history using Claude
   local found_cmd
