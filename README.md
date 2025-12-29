@@ -4,7 +4,7 @@ AI-powered shell assistant for Zsh using Claude AI.
 
 ## Overview
 
-Claude Shell is an Oh My Zsh plugin that provides intelligent shell assistance using Claude AI. It offers four powerful features to enhance your command-line experience: natural language command translation, command explanation, error fixing, and intelligent history search.
+Claude Shell is an Oh My Zsh plugin that provides intelligent shell assistance using Claude AI. It offers six powerful features to enhance your command-line experience: natural language command translation, command explanation, error fixing, intelligent history search, and Kitty terminal integration for advanced scrollback analysis.
 
 ## Features
 
@@ -14,6 +14,8 @@ Claude Shell is an Oh My Zsh plugin that provides intelligent shell assistance u
 | **Alt+E** | Explain Command | Get detailed explanations of complex commands |
 | **Alt+X** | Fix Last Error | Analyze and fix the last failed command |
 | **Alt+S** | History Search | Search command history using natural language |
+| **Alt+W** | What Went Wrong? | Analyze scrollback buffer for errors (Kitty only) |
+| **Alt+Q** | Quick Summary | Summarize current screen output (Kitty only) |
 
 ### Common Capabilities
 
@@ -27,6 +29,7 @@ Claude Shell is an Oh My Zsh plugin that provides intelligent shell assistance u
 - [Claude CLI](https://github.com/anthropics/claude-cli) installed and available in PATH
 - Valid Claude API credentials configured
 - Oh My Zsh installed
+- [Kitty terminal](https://sw.kovidgoyal.net/kitty/) (optional - required for Alt+W and Alt+Q features)
 
 ## Installation
 
@@ -199,6 +202,194 @@ Find commands from history:
 3. find . -size +100M
 ```
 
+---
+
+## Kitty Terminal Features
+
+The following features require the [Kitty terminal emulator](https://sw.kovidgoyal.net/kitty/) and provide advanced analysis capabilities by accessing the terminal's scrollback buffer.
+
+### 5. What Went Wrong? (Alt+W)
+
+Analyzes your terminal scrollback buffer to identify errors, warnings, and issues from recent command output.
+
+**How to use:**
+1. After encountering an error or unexpected behavior
+2. Press `Alt+W`
+3. Review the AI analysis of what went wrong
+4. Get contextual explanations and potential solutions
+
+**Examples:**
+
+**Scenario:** Failed compilation with multiple errors
+```bash
+$ make build
+gcc: error: undefined reference to 'main'
+ld: symbol(s) not found for architecture x86_64
+clang: error: linker command failed with exit code 1
+
+# Press Alt+W
+```
+
+**Analysis:**
+```
+The compilation failed with a linker error. Analysis:
+
+1. Missing main() function - The linker cannot find the program entry point
+2. Architecture mismatch - Trying to link incompatible object files
+3. The error occurred during the linking phase, not compilation
+
+Suggested fixes:
+- Ensure your source file includes a main() function
+- Check that all object files are compiled for the same architecture
+- Verify all required source files are included in the build
+```
+
+**Scenario:** Docker container failing to start
+```bash
+$ docker-compose up
+ERROR: for webapp  Cannot start service webapp: driver failed
+Error: failed to create shim: OCI runtime create failed
+Container exited with code 137
+
+# Press Alt+W
+```
+
+**Analysis:**
+```
+Docker container startup failed. Analysis:
+
+1. Exit code 137 indicates the container was killed (128 + 9 = SIGKILL)
+2. OCI runtime error suggests low-level container runtime issues
+3. Common causes: insufficient memory, resource limits, or conflicts
+
+Suggested fixes:
+- Check available memory: docker stats
+- Increase memory limits in docker-compose.yml
+- Check for port conflicts with: netstat -tulpn
+- Review container logs: docker logs webapp
+```
+
+**Scenario:** Python traceback in test output
+```bash
+$ pytest tests/
+======== FAILURES ========
+tests/test_api.py::test_login FAILED
+Traceback (most recent call last):
+  File "tests/test_api.py", line 45, in test_login
+    assert response.status_code == 200
+AssertionError: assert 401 == 200
+
+# Press Alt+W
+```
+
+**Analysis:**
+```
+Test failure in authentication endpoint. Analysis:
+
+1. Expected HTTP 200 (OK) but received 401 (Unauthorized)
+2. The login endpoint is rejecting the credentials
+3. This is an assertion error in test_login function
+
+Possible causes:
+- Test credentials are incorrect or expired
+- Authentication service is not properly configured
+- Database seeding might have failed
+- Token generation logic has a bug
+
+Next steps:
+- Verify test fixtures and credentials in conftest.py
+- Check if authentication service is running
+- Review recent changes to login endpoint
+- Add debug logging to see actual vs expected credentials
+```
+
+---
+
+### 6. Quick Summary (Alt+Q)
+
+Provides a concise summary of the current screen output, useful for understanding long command outputs or complex terminal sessions.
+
+**How to use:**
+1. After running a command with extensive output
+2. Press `Alt+Q`
+3. Get a brief summary of what's displayed on screen
+
+**Examples:**
+
+**Scenario:** Long test suite results
+```bash
+$ pytest tests/ -v
+[hundreds of lines of test output]
+
+# Press Alt+Q
+```
+
+**Summary:**
+```
+Test Results Summary:
+- Total: 156 tests
+- Passed: 142 (91%)
+- Failed: 12 (8%)
+- Skipped: 2 (1%)
+
+Failed tests concentrated in:
+- tests/test_database.py (8 failures)
+- tests/test_api.py (4 failures)
+
+Most common failure: Connection timeout to test database
+```
+
+**Scenario:** System resource overview
+```bash
+$ htop
+[complex system monitor display]
+
+# Press Alt+Q
+```
+
+**Summary:**
+```
+System Status:
+- CPU: 8 cores, average 45% usage (cores 2 and 5 at 90%)
+- Memory: 12.4GB / 16GB used (78%)
+- Swap: 2.1GB / 8GB used
+- Load average: 2.4, 2.1, 1.9
+
+Top processes:
+1. chrome (3.2GB RAM, 25% CPU)
+2. python (1.8GB RAM, 15% CPU)
+3. docker (890MB RAM, 8% CPU)
+
+System is under moderate load, memory usage approaching limit.
+```
+
+**Scenario:** Git log analysis
+```bash
+$ git log --oneline -50
+[50 commit entries]
+
+# Press Alt+Q
+```
+
+**Summary:**
+```
+Recent Git Activity (last 50 commits):
+- Timeframe: Last 2 weeks
+- Primary focus: Authentication refactoring (18 commits)
+- Bug fixes: 12 commits
+- Feature additions: 15 commits
+- Documentation: 5 commits
+
+Main contributors:
+- alice (28 commits)
+- bob (15 commits)
+- charlie (7 commits)
+
+Latest significant change: "Implement OAuth2 integration" (3 hours ago)
+```
+
+---
+
 ## How It Works
 
 Each feature follows a similar workflow:
@@ -245,6 +436,14 @@ These features print output directly to the terminal rather than replacing the b
 The Alt+X feature requires:
 - A command to have been executed previously in the session
 - The `fc` command to access history (available in most Zsh configurations)
+
+### "This feature requires Kitty terminal" error
+
+The Alt+W and Alt+Q features are only available in Kitty terminal:
+- Install Kitty: https://sw.kovidgoyal.net/kitty/
+- These features use Kitty's scrollback buffer API
+- They will not work in other terminals (iTerm2, Alacritty, GNOME Terminal, etc.)
+- All other plugin features (Alt+G, Alt+E, Alt+X, Alt+S) work in any terminal
 
 ## License
 
