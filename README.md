@@ -40,7 +40,7 @@ plugins=(
 3. Reload your shell configuration:
 
 ```bash
-source ~/.zshrc
+omz reload
 ```
 
 ## Usage
@@ -125,7 +125,7 @@ The plugin automatically strips markdown formatting, but if you see backticks or
 
 - Verify the plugin is loaded: `echo $plugins | grep claude-shell`
 - Check for keybinding conflicts: `bindkey | grep '\^G'`
-- Try reloading your shell: `source ~/.zshrc`
+- Try reloading your shell: `omz reload`
 
 ## License
 
