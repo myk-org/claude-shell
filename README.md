@@ -1,18 +1,26 @@
 # Claude Shell
 
-Natural language to shell command translation for Zsh using Claude AI.
+AI-powered shell assistant for Zsh using Claude AI.
 
 ## Overview
 
-Claude Shell is an Oh My Zsh plugin that translates natural language queries into executable shell commands using Claude AI. Type what you want to do in plain English, press a keybinding, and get an accurate shell command ready to execute.
+Claude Shell is an Oh My Zsh plugin that provides intelligent shell assistance using Claude AI. It offers four powerful features to enhance your command-line experience: natural language command translation, command explanation, error fixing, and intelligent history search.
 
 ## Features
 
-- **Instant Translation**: Convert natural language to shell commands with a single keystroke
-- **Interactive Workflow**: Review and edit the suggested command before execution
-- **Real-time Feedback**: Visual indicator while translation is in progress
-- **Error Handling**: Gracefully handles failures and restores your original input
-- **Clean Output**: Returns raw commands without markdown formatting or explanations
+| Keybinding | Feature | Description |
+|------------|---------|-------------|
+| **Alt+G** | Natural Language to Shell | Convert plain English to executable commands |
+| **Alt+E** | Explain Command | Get detailed explanations of complex commands |
+| **Alt+X** | Fix Last Error | Analyze and fix the last failed command |
+| **Alt+S** | History Search | Search command history using natural language |
+
+### Common Capabilities
+
+- **Interactive Workflow**: Review and edit suggestions before execution
+- **Real-time Feedback**: Visual indicator while processing
+- **Error Handling**: Gracefully handles failures and restores your input
+- **Clean Output**: Returns focused, actionable results
 
 ## Requirements
 
@@ -45,62 +53,161 @@ omz reload
 
 ## Usage
 
-1. Type your natural language request on the command line
-2. Press `Ctrl+G` to translate
+### 1. Natural Language to Shell Command (Alt+G)
+
+Convert plain English descriptions into executable shell commands.
+
+**How to use:**
+1. Type your natural language request
+2. Press `Alt+G`
 3. Review the generated command
 4. Press `Enter` to execute or edit as needed
 
-### Keybinding
+**Examples:**
 
-- **Ctrl+G** - Translate current buffer from natural language to shell command
+| Natural Language Input | Generated Command |
+|------------------------|-------------------|
+| `list all python files in current directory` | `ls *.py` |
+| `find large files bigger than 100MB` | `find . -type f -size +100M` |
+| `count lines in all shell scripts` | `find . -name "*.sh" -exec wc -l {} +` |
+| `show disk usage sorted by size` | `du -sh * | sort -h` |
+| `search for TODO in all python files` | `grep -r "TODO" --include="*.py" .` |
+| `show git log with graph for last 10 commits` | `git log --graph --oneline -10` |
+| `undo last commit but keep changes` | `git reset --soft HEAD~1` |
 
-## Examples
+---
 
-### File Operations
+### 2. Explain Command (Alt+E)
 
-**Input:** `list all python files in current directory`
-**Output:** `ls *.py`
+Get clear, detailed explanations of complex shell commands.
 
-**Input:** `find large files bigger than 100MB`
-**Output:** `find . -type f -size +100M`
+**How to use:**
+1. Type or paste a command you want to understand
+2. Press `Alt+E`
+3. Read the explanation printed to your terminal
+4. Original command remains in the buffer
 
-**Input:** `count lines in all shell scripts`
-**Output:** `find . -name "*.sh" -exec wc -l {} +`
+**Examples:**
 
-### System Information
+**Input:** `find . -type f -name "*.log" -mtime +30 -delete`
 
-**Input:** `show disk usage sorted by size`
-**Output:** `du -sh * | sort -h`
+**Explanation:**
+```
+This command finds and deletes log files older than 30 days:
+- find .           : Start searching from current directory
+- -type f          : Look for files only (not directories)
+- -name "*.log"    : Match files ending in .log
+- -mtime +30       : Modified more than 30 days ago
+- -delete          : Remove matched files
+```
 
-**Input:** `list running docker containers`
-**Output:** `docker ps`
+**Input:** `ps aux | grep python | awk '{print $2}' | xargs kill`
 
-**Input:** `check memory usage`
-**Output:** `free -h`
+**Explanation:**
+```
+This command kills all Python processes:
+- ps aux           : List all running processes
+- grep python      : Filter for processes containing "python"
+- awk '{print $2}' : Extract the process ID (column 2)
+- xargs kill       : Pass each PID to the kill command
+```
 
-### Text Processing
+---
 
-**Input:** `search for TODO in all python files`
-**Output:** `grep -r "TODO" --include="*.py" .`
+### 3. Fix Last Error (Alt+X)
 
-**Input:** `replace foo with bar in all text files`
-**Output:** `find . -name "*.txt" -exec sed -i 's/foo/bar/g' {} +`
+Automatically analyze and fix the last failed command.
 
-### Git Operations
+**How to use:**
+1. Run a command that fails
+2. Press `Alt+X`
+3. Review the suggested fix
+4. Press `Enter` to execute or edit as needed
 
-**Input:** `show git log with graph for last 10 commits`
-**Output:** `git log --graph --oneline -10`
+**Examples:**
 
-**Input:** `undo last commit but keep changes`
-**Output:** `git reset --soft HEAD~1`
+**Scenario:** Permission denied error
+```bash
+$ cat /var/log/syslog
+cat: /var/log/syslog: Permission denied
+
+# Press Alt+X
+$ sudo cat /var/log/syslog
+```
+
+**Scenario:** Missing file
+```bash
+$ cd /tmp/nonexistent
+cd: no such file or directory: /tmp/nonexistent
+
+# Press Alt+X
+$ mkdir -p /tmp/nonexistent && cd /tmp/nonexistent
+```
+
+**Scenario:** Syntax error
+```bash
+$ find . -name *.txt
+find: paths must precede expression: notes.txt
+
+# Press Alt+X
+$ find . -name "*.txt"
+```
+
+---
+
+### 4. History Search (Alt+S)
+
+Search your command history using natural language descriptions.
+
+**How to use:**
+1. Type what you're looking for in plain English
+2. Press `Alt+S`
+3. Review matching commands from your history
+4. Copy and use the command you need
+
+**Examples:**
+
+**Input:** `docker commands from last week`
+
+**Output:**
+```
+Recent docker commands:
+1. docker ps -a
+2. docker build -t myapp:latest .
+3. docker-compose up -d
+4. docker logs myapp
+```
+
+**Input:** `git operations on main branch`
+
+**Output:**
+```
+Git commands involving main:
+1. git checkout main
+2. git merge feature/new-ui
+3. git push origin main
+4. git log main --oneline -10
+```
+
+**Input:** `find commands for searching files`
+
+**Output:**
+```
+Find commands from history:
+1. find . -name "*.py" -type f
+2. find /var/log -mtime +7 -delete
+3. find . -size +100M
+```
 
 ## How It Works
 
-1. The plugin captures your natural language query from the command buffer
-2. Sends it to Claude CLI with a prompt optimized for command translation
-3. Processes the response to ensure clean, executable output
-4. Replaces the buffer with the translated shell command
-5. Positions the cursor at the end for easy editing
+Each feature follows a similar workflow:
+
+1. Captures relevant context (buffer content, last command, exit code, or history)
+2. Sends context to Claude CLI with a feature-specific prompt
+3. Processes the response for clean, actionable output
+4. Updates the buffer or displays results appropriately
+5. Positions the cursor for easy interaction
 
 ## Configuration
 
@@ -124,8 +231,20 @@ The plugin automatically strips markdown formatting, but if you see backticks or
 ### Keybinding doesn't work
 
 - Verify the plugin is loaded: `echo $plugins | grep claude-shell`
-- Check for keybinding conflicts: `bindkey | grep '\^G'`
+- Check for keybinding conflicts: `bindkey | grep '\^['` (for Alt key bindings)
 - Try reloading your shell: `omz reload`
+
+### No output from Explain (Alt+E) or History Search (Alt+S)
+
+These features print output directly to the terminal rather than replacing the buffer. Check:
+- Your terminal scrollback if output seems missing
+- Claude CLI is working: `claude "test message"`
+
+### Fix Last Error shows "No previous command found"
+
+The Alt+X feature requires:
+- A command to have been executed previously in the session
+- The `fc` command to access history (available in most Zsh configurations)
 
 ## License
 
