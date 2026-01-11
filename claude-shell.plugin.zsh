@@ -38,6 +38,11 @@
 #     1. Press Alt+Q to get a concise summary of current terminal output
 #     2. Useful for understanding long command outputs
 #
+#   Enter with ? prefix: Quick Question
+#     1. Type a question starting with ?: "? what is the capital of France"
+#     2. Press Enter to get a brief answer from Claude
+#     3. Normal commands (without ?) execute normally
+#
 # Requirements:
 #   - Claude CLI tool must be installed and available in PATH
 #   - Proper Claude API credentials configured
@@ -50,6 +55,7 @@
 #   Alt+S - Search command history with natural language
 #   Alt+W - Analyze error in scrollback (Kitty only)
 #   Alt+Q - Summarize terminal output (Kitty only)
+#   Enter - Quick question (when buffer starts with ?)
 #
 # Author: Custom Plugin
 # ------------------------------------------------------------------------------
@@ -291,6 +297,58 @@ claude-summarize-output() {
   zle -R
 }
 
+# Quick question widget
+# Intercepts Enter key - if buffer starts with ?, asks Claude; otherwise executes normally
+claude-quick-question() {
+  # If buffer doesn't start with ?, execute normally
+  if [[ "$BUFFER" != \?* ]]; then
+    zle accept-line
+    return
+  fi
+
+  # Extract question (remove leading ? and trim whitespace)
+  local question="${BUFFER#\?}"
+  question="${question##[[:space:]]}"
+  question="${question%%[[:space:]]}"
+
+  # If empty question, show error
+  if [[ -z "$question" ]]; then
+    zle -M "Please enter a question after ?"
+    zle -R
+    return
+  fi
+
+  # Show status
+  zle -M "Asking Claude..."
+  zle -R
+
+  # Call Claude
+  local exit_status
+  local answer
+  answer=$(echo "$question" | claude -p "Answer this question briefly and directly. Be concise." 2>/dev/null)
+  exit_status=$?
+
+  if [[ $exit_status -eq 0 && -n "$answer" ]]; then
+    # Clean markdown artifacts
+    answer=$(echo "$answer" | sed 's/^```[a-z]*//;s/```$//' | tr -d '`')
+
+    # Clear buffer first
+    BUFFER=""
+    CURSOR=0
+
+    # Tell ZLE we're outputting to terminal
+    zle -I
+
+    # Print Q&A to terminal
+    echo ""
+    echo "Q: $question"
+    echo "A: $answer"
+    echo ""
+  else
+    zle -M "Error: Could not get answer from Claude"
+  fi
+}
+
 # Register all widgets
 zle -N claude-nl-to-shell
 zle -N claude-explain-command
@@ -298,6 +356,7 @@ zle -N claude-fix-error
 zle -N claude-history-search
 zle -N claude-what-went-wrong
 zle -N claude-summarize-output
+zle -N claude-quick-question
 
 # Bind to Alt+ keys (^[ is the escape sequence for Alt)
 bindkey '^[g' claude-nl-to-shell       # Alt+G
@@ -306,3 +365,4 @@ bindkey '^[x' claude-fix-error         # Alt+X
 bindkey '^[s' claude-history-search    # Alt+S
 bindkey '^[w' claude-what-went-wrong   # Alt+W
 bindkey '^[q' claude-summarize-output  # Alt+Q
+bindkey '^M' claude-quick-question     # Enter (intercepts ? questions)
