@@ -4,7 +4,7 @@ AI-powered shell assistant for Zsh using Claude AI.
 
 ## Overview
 
-Claude Shell is an Oh My Zsh plugin that provides intelligent shell assistance using Claude AI. It offers six powerful features to enhance your command-line experience: natural language command translation, command explanation, error fixing, intelligent history search, and Kitty terminal integration for advanced scrollback analysis.
+Claude Shell is an Oh My Zsh plugin that provides intelligent shell assistance using Claude AI. It offers seven powerful features to enhance your command-line experience: natural language command translation, command explanation, error fixing, intelligent history search, and Kitty terminal integration for advanced scrollback analysis.
 
 ## Features
 
@@ -16,6 +16,7 @@ Claude Shell is an Oh My Zsh plugin that provides intelligent shell assistance u
 | **Alt+S** | History Search | Search command history using natural language |
 | **Alt+W** | What Went Wrong? | Analyze scrollback buffer for errors (Kitty only) |
 | **Alt+Q** | Quick Summary | Summarize current screen output (Kitty only) |
+| **Enter with ?** | Quick Question | Ask AI questions directly from the shell |
 
 ### Common Capabilities
 
@@ -204,11 +205,57 @@ Find commands from history:
 
 ---
 
+### 5. Quick Question (Enter with ? prefix)
+
+Ask AI questions directly from your shell prompt without leaving the terminal.
+
+**How to use:**
+1. Type your question starting with `?`
+2. Press `Enter`
+3. See the Q&A printed to your terminal
+4. Continue with a fresh prompt
+
+**Examples:**
+
+```bash
+? what is the capital of France
+```
+
+**Output:**
+```
+Q: what is the capital of France
+A: The capital of France is Paris.
+```
+
+```bash
+? how do I list docker containers
+```
+
+**Output:**
+```
+Q: how do I list docker containers
+A: Use `docker ps` to list running containers, or `docker ps -a` to include stopped containers.
+```
+
+```bash
+? explain git rebase vs merge
+```
+
+**Output:**
+```
+Q: explain git rebase vs merge
+A: Merge creates a new commit combining branches, preserving history. Rebase replays commits onto another branch, creating a linear history but rewriting commit hashes.
+```
+
+**Note:** Normal commands without the `?` prefix execute normally - Enter key behavior is unchanged for regular shell commands.
+
+---
+
 ## Kitty Terminal Features
 
 The following features require the [Kitty terminal emulator](https://sw.kovidgoyal.net/kitty/) and provide advanced analysis capabilities by accessing the terminal's scrollback buffer.
 
-### 5. What Went Wrong? (Alt+W)
+### 6. What Went Wrong? (Alt+W)
 
 Analyzes your terminal scrollback buffer to identify errors, warnings, and issues from recent command output.
 
@@ -305,7 +352,7 @@ Next steps:
 
 ---
 
-### 6. Quick Summary (Alt+Q)
+### 7. Quick Summary (Alt+Q)
 
 Provides a concise summary of the current screen output, useful for understanding long command outputs or complex terminal sessions.
 
