@@ -494,7 +494,7 @@ The Alt+W and Alt+Q features are only available in Kitty terminal:
 
 ## License
 
-This plugin is provided as-is for personal and commercial use.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
